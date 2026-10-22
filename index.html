@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ງານບຸນລອຍກະທົງຄູ່ຮັກ - Loy Krathong</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Lao typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Noto Sans Lao', sans-serif;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Sky Gradient Background */
+        .sky-bg {
+            background: linear-gradient(to bottom, #090a0f 0%, #121526 40%, #1a1c38 70%, #2b1d3d 100%);
+        }
+
+        /* Full Moon Glow Effect */
+        .moon {
+            background: radial-gradient(circle at 35% 35%, #fffde8 0%, #ffe993 50%, #fadb5f 100%);
+            box-shadow: 0 0 40px #fce888, 0 0 80px rgba(253, 224, 71, 0.4);
+        }
+
+        /* Water Animation & Gradient */
+        .river-container {
+            background: linear-gradient(to bottom, #111528 0%, #0c0e1a 100%);
+        }
+
+        .wave {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1000% 1000% 0 0;
+            position: absolute;
+            width: 200%;
+            bottom: 0;
+            animation: waveAnim 12s infinite linear;
+        }
+
+        .wave:nth-child(2) {
+            bottom: 10px;
+            opacity: 0.5;
+            animation: waveAnim 8s infinite linear reverse;
+            background: rgba(250, 204, 21, 0.03);
+        }
+
+        @keyframes waveAnim {
+            0% { transform: translateX(0) translateZ(0) scaleY(1); }
+            50% { transform: translateX(-25%) translateZ(0) scaleY(0.85); }
+            100% { transform: translateX(-50%) translateZ(0) scaleY(1); }
+        }
+
+        /* Twinkling Stars */
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Candle Flame Flickering */
+        .flame {
+            animation: flicker 0.15s infinite alternate ease-in-out;
+            transform-origin: center bottom;
+        }
+
+        @keyframes flicker {
+            0% { transform: scale(0.95) rotate(-1deg); opacity: 0.85; }
+            100% { transform: scale(1.1) rotate(1deg); opacity: 1; }
+        }
+
+        /* Floating Sky Lanterns */
+        .lantern {
+            position: absolute;
+            background: linear-gradient(to top, #ff7e5f, #feb47b);
+            border-radius: 4px 4px 12px 12px;
+            box-shadow: 0 0 12px rgba(255, 126, 95, 0.8);
+            animation: floatUp var(--speed) infinite linear;
+            opacity: 0.8;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(105vh) translateX(0) scale(0.6); opacity: 0; }
+            10% { opacity: 0.9; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(-10vh) translateX(var(--drift)) scale(1.1); opacity: 0; }
+        }
+
+        /* Krathong Water Floating Animation */
+        .floating-krathong {
+            animation: floatGently 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatGently {
+            0% { transform: translateY(0px) rotate(-1deg); }
+            100% { transform: translateY(-8px) rotate(1deg); }
+        }
+
+        /* Krathong Floating Away Animation Sequence */
+        .krathong-departing {
+            transition: all 12s cubic-bezier(0.25, 0.1, 0.25, 1);
+            transform: translateY(-180px) scale(0.18) !important;
+            opacity: 0.3 !important;
+            filter: blur(1px);
+        }
+
+        /* Custom Scrollbar for Form Elements */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="sky-bg text-white min-h-screen overflow-x-hidden relative flex flex-col justify-between select-none">
+
+    <!-- Sky Background with Stars & Moon -->
+    <div id="stars-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+    <div id="lanterns-container" class="absolute inset-0 overflow-hidden pointer-events-none z-0"></div>
+
+    <!-- Moon -->
+    <div class="moon absolute top-6 right-6 w-20 h-20 sm:w-28 sm:h-28 rounded-full pointer-events-none z-0"></div>
+
+    <!-- Top Header Bar -->
+    <header class="relative z-10 pt-4 px-4 text-center flex justify-between items-center max-w-md mx-auto w-full">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid font-bold text-yellow-400 text-xl fa-hands-praying"></i>
+            <span class="text-xs sm:text-sm font-semibold tracking-wide text-yellow-200">ງານບຸນລອຍກະທົງ</span>
+        </div>
+        
+        <!-- Audio Ambient Toggle -->
+        <button id="audio-btn" onclick="toggleAudio()" class="bg-white/10 backdrop-blur-md border border-white/20 p-2 px-3 rounded-full text-xs flex items-center gap-2 hover:bg-white/20 transition">
+            <i id="audio-icon" class="fa-solid fa-volume-xmark text-yellow-400"></i>
+            <span id="audio-text" class="hidden sm:inline">ສຽງເພງ</span>
+        </button>
+    </header>
+
+    <!-- MAIN INTERACTIVE CONTAINER -->
+    <main class="relative z-10 flex-1 flex flex-col items-center justify-center p-4 max-w-md mx-auto w-full">
+
+        <!-- TITLE / HEADER -->
+        <div class="text-center mb-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-pink-200 to-yellow-400 drop-shadow">
+                ລອຍກະທົງຄູ່ຮັກ
+            </h1>
+            <p class="text-xs text-yellow-100/80 mt-1">
+                ໃສ່ຮູບໜ້າຂອງທ່ານ ແລະ ຄົນຮັກ ເພື່ອລອຍກະທົງນຳກັນ
+            </p>
+        </div>
+
+        <!-- FORM SETUP CARD (Shows initially) -->
+        <div id="setup-card" class="w-full bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl p-5 shadow-2xl transition-all duration-500">
+            
+            <!-- AVATAR UPLOAD SECTION -->
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                
+                <!-- Person 1 Avatar Upload -->
+                <div class="flex flex-col items-center">
+                    <label class="text-xs text-yellow-300 font-semibold mb-2">ຝ່າຍຊາຍ / ຄົນທີ 1</label>
+                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-dashed border-yellow-400/60 p-1 flex items-center justify-center group cursor-pointer overflow-hidden bg-black/20 hover:border-yellow-400 transition" onclick="document.getElementById('avatar1-input').click()">
+                        <img id="p1-preview" src="https://placehold.co/150x150/1e293b/fbbf24?text=ຝ່າຍຊາຍ" class="w-full h-full object-cover rounded-full" alt="Person 1">
+                        <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-full">
+                            <i class="fa-solid fa-camera text-white text-lg"></i>
+                            <span class="text-[10px] text-white">ເລືອກຮູບ</span>
+                        </div>
+                    </div>
+                    <input type="file" id="avatar1-input" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'p1-preview', 'avatar1-img')">
+                </div>
+
+                <!-- Person 2 Avatar Upload -->
+                <div class="flex flex-col items-center">
+                    <label class="text-xs text-pink-300 font-semibold mb-2">ຝ່າຍຍິງ / ຄົນທີ 2</label>
+                    <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-dashed border-pink-400/60 p-1 flex items-center justify-center group cursor-pointer overflow-hidden bg-black/20 hover:border-pink-400 transition" onclick="document.getElementById('avatar2-input').click()">
+                        <img id="p2-preview" src="https://placehold.co/150x150/1e293b/f472b6?text=ຝ່າຍຍິງ" class="w-full h-full object-cover rounded-full" alt="Person 2">
+                        <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition rounded-full">
+                            <i class="fa-solid fa-camera text-white text-lg"></i>
+                            <span class="text-[10px] text-white">ເລືອກຮູບ</span>
+                        </div>
+                    </div>
+                    <input type="file" id="avatar2-input" accept="image/*" class="hidden" onchange="handleImageUpload(event, 'p2-preview', 'avatar2-img')">
+                </div>
+
+            </div>
+
+            <!-- WISH TEXT INPUT -->
+            <div class="mb-5">
+                <label for="wish-input" class="block text-xs text-yellow-200 font-medium mb-1">
+                    <i class="fa-solid fa-heart text-pink-400 mr-1"></i> ຄຳອະທິຖານ / ຄຳອວຍພອນ:
+                </label>
+                <textarea id="wish-input" rows="2" class="w-full bg-black/30 border border-white/20 rounded-xl p-2.5 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-yellow-400 resize-none transition" placeholder="ຂໍໃຫ້ຄວາມຮັກຂອງພວກເຮົາຍືນຍາວ, ມີຄວາມສຸກ ແລະ ສົມຫວັງໃນທຸກປະການ..."></textarea>
+            </div>
+
+            <!-- OK CONFIRM BUTTON -->
+            <button id="ok-btn" onclick="startFloatingProcess()" class="w-full py-3 bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-slate-900 font-bold text-sm rounded-xl shadow-lg shadow-orange-500/30 transform active:scale-95 transition flex items-center justify-center space-x-2">
+                <span>ກົດ OK ເພື່ອປ່ອຍກະທົງ</span>
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+
+        </div>
+
+        <!-- WISH DISPLAY BOARD (Shows during animation) -->
+        <div id="wish-display" class="hidden w-full bg-white/10 backdrop-blur-md border border-amber-300/30 rounded-2xl p-4 text-center shadow-xl mb-4 animate-fade-in">
+            <i class="fa-solid fa-quote-left text-amber-300/40 text-2xl mb-1"></i>
+            <p id="wish-text-output" class="text-xs sm:text-sm text-yellow-100 italic leading-relaxed px-2"></p>
+            <i class="fa-solid fa-quote-right text-amber-300/40 text-2xl mt-1"></i>
+        </div>
+
+    </main>
+
+    <!-- RIVER & FLOATING ANIMATION AREA -->
+    <section class="relative w-full h-72 sm:h-80 river-container border-t border-indigo-900/40 flex flex-col items-center justify-end overflow-hidden">
+        
+        <!-- Animated Water Waves -->
+        <div class="wave"></div>
+        <div class="wave"></div>
+
+        <!-- Interactive Couple Avatars & Krathong Assembly -->
+        <div id="scene-assembly" class="relative z-10 flex flex-col items-center mb-6 transition-all duration-700">
+            
+            <!-- Avatars Holding Hands / Standing Together -->
+            <div id="avatars-couple" class="flex items-center -mb-3 space-x-2 transition-transform duration-700">
+                
+                <!-- Person 1 (Male/Left Avatar) -->
+                <div class="flex flex-col items-center transform translate-x-2">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-yellow-400 overflow-hidden shadow-lg bg-slate-800">
+                        <img id="avatar1-img" src="https://placehold.co/150x150/1e293b/fbbf24?text=ຝ່າຍຊາຍ" class="w-full h-full object-cover">
+                    </div>
+                    <!-- Body graphics -->
+                    <div class="w-10 h-10 bg-amber-600 rounded-t-xl -mt-1 flex items-center justify-center">
+                        <div class="w-8 h-8 bg-amber-700 rounded-t-lg"></div>
+                    </div>
+                </div>
+
+                <!-- Person 2 (Female/Right Avatar) -->
+                <div class="flex flex-col items-center transform -translate-x-2">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-pink-400 overflow-hidden shadow-lg bg-slate-800">
+                        <img id="avatar2-img" src="https://placehold.co/150x150/1e293b/f472b6?text=ຝ່າຍຍິງ" class="w-full h-full object-cover">
+                    </div>
+                    <!-- Body graphics -->
+                    <div class="w-10 h-10 bg-pink-600 rounded-t-xl -mt-1 flex items-center justify-center">
+                        <div class="w-8 h-8 bg-pink-700 rounded-t-lg"></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Detailed SVG Krathong -->
+            <div id="krathong-element" class="relative w-36 h-28 sm:w-44 sm:h-32 floating-krathong transition-all duration-1000">
+                <svg viewBox="0 0 200 150" class="w-full h-full filter drop-shadow-[0_10px_8px_rgba(0,0,0,0.5)]">
+                    
+                    <!-- Banana Leaves Base Layer -->
+                    <g fill="#15803d">
+                        <path d="M 20,100 Q 0,70 40,75 Q 80,80 100,100 Z" />
+                        <path d="M 180,100 Q 200,70 160,75 Q 120,80 100,100 Z" />
+                        <path d="M 40,105 Q 20,75 60,80 Q 100,85 100,105 Z" fill="#166534" />
+                        <path d="M 160,105 Q 180,75 140,80 Q 100,85 100,105 Z" fill="#166534" />
+                    </g>
+
+                    <!-- Front Lotus Petals Outer -->
+                    <g fill="#e11d48">
+                        <path d="M 30,95 C 10,70 50,60 70,90 Z" />
+                        <path d="M 170,95 C 190,70 150,60 130,90 Z" />
+                        <path d="M 60,95 C 40,65 90,55 100,90 Z" fill="#f43f5e" />
+                        <path d="M 140,95 C 160,65 110,55 100,90 Z" fill="#f43f5e" />
+                        <path d="M 80,98 C 70,65 130,65 120,98 Z" fill="#fb7185" />
+                    </g>
+
+                    <!-- Base Base/Base Trunk -->
+                    <ellipse cx="100" cy="105" rx="70" ry="15" fill="#14532d" />
+                    <ellipse cx="100" cy="102" rx="65" ry="12" fill="#84cc16" />
+
+                    <!-- Flowers (Marigolds/Yellow) -->
+                    <circle cx="70" cy="98" r="7" fill="#facc15" />
+                    <circle cx="85" cy="101" r="8" fill="#eab308" />
+                    <circle cx="100" cy="102" r="9" fill="#facc15" />
+                    <circle cx="115" cy="101" r="8" fill="#eab308" />
+                    <circle cx="130" cy="98" r="7" fill="#facc15" />
+
+                    <!-- Incense Sticks (3 Sticks) -->
+                    <line x1="94" y1="95" x2="88" y2="50" stroke="#78350f" stroke-width="2" />
+                    <line x1="100" y1="95" x2="100" y2="45" stroke="#78350f" stroke-width="2" />
+                    <line x1="106" y1="95" x2="112" y2="50" stroke="#78350f" stroke-width="2" />
+                    
+                    <!-- Incense Smoke Effect -->
+                    <circle cx="88" cy="48" r="1.5" fill="#fef08a" opacity="0.8" />
+                    <circle cx="100" cy="43" r="1.5" fill="#fef08a" opacity="0.8" />
+                    <circle cx="112" cy="48" r="1.5" fill="#fef08a" opacity="0.8" />
+
+                    <!-- Candle Base -->
+                    <rect x="96" y="55" width="8" height="40" fill="#fef08a" rx="2" />
+
+                    <!-- Candle Flame Glow & Fire -->
+                    <g class="flame">
+                        <!-- Outer Glow -->
+                        <circle cx="100" cy="48" r="14" fill="#fde047" opacity="0.3" />
+                        <!-- Main Flame -->
+                        <path d="M 100,38 C 95,46 97,54 100,55 C 103,54 105,46 100,38 Z" fill="#f97316" />
+                        <path d="M 100,42 C 97,47 98,53 100,54 C 102,53 103,47 100,42 Z" fill="#facc15" />
+                    </g>
+                </svg>
+            </div>
+
+        </div>
+
+        <!-- RESET / FLOAT AGAIN BUTTON (Shows after floating) -->
+        <div id="reset-container" class="hidden relative z-20 mb-6">
+            <button onclick="resetApp()" class="px-6 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white font-medium text-xs sm:text-sm rounded-full shadow-lg transition transform active:scale-95 flex items-center space-x-2">
+                <i class="fa-solid fa-rotate-right text-yellow-300"></i>
+                <span>ປ່ອຍກະທົງໃໝ່ອີກຄັ້ງ</span>
+            </button>
+        </div>
+
+    </section>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // State variables
+        let isAudioPlaying = false;
+        let audioCtx = null;
+        let oscillator = null;
+        let gainNode = null;
+
+        // On Page Load: Generate ambient stars and sky lanterns
+        window.onload = function() {
+            generateStars();
+            generateLanterns();
+        };
+
+        // Generate stars in the sky
+        function generateStars() {
+            const starsContainer = document.getElementById('stars-container');
+            const starCount = 45;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                const size = Math.random() * 2.5 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.top = `${Math.random() * 65}%`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Generate floating sky lanterns
+        function generateLanterns() {
+            const lanternsContainer = document.getElementById('lanterns-container');
+            const lanternCount = 10;
+            for (let i = 0; i < lanternCount; i++) {
+                const lantern = document.createElement('div');
+                lantern.className = 'lantern';
+                const width = Math.random() * 10 + 10;
+                lantern.style.width = `${width}px`;
+                lantern.style.height = `${width * 1.3}px`;
+                lantern.style.left = `${Math.random() * 95}%`;
+                lantern.style.setProperty('--speed', `${Math.random() * 10 + 14}s`);
+                lantern.style.setProperty('--drift', `${(Math.random() - 0.5) * 80}px`);
+                lantern.style.animationDelay = `${Math.random() * 12}s`;
+                lanternsContainer.appendChild(lantern);
+            }
+        }
+
+        // Handle Image Upload Preview for avatars
+        function handleImageUpload(event, previewId, targetImgId) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(previewId).src = e.target.result;
+                    document.getElementById(targetImgId).src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Start Floating Animation Sequence
+        function startFloatingProcess() {
+            const wishInput = document.getElementById('wish-input').value.trim();
+            const wishOutput = document.getElementById('wish-text-output');
+            
+            // Set default text if empty
+            wishOutput.innerText = wishInput || "ຂໍໃຫ້ຄວາມຮັກຂອງພວກເຮົາມີຄວາມສຸກ, ປາສະຈາກໂລກໄພໄຂ້ເຈັບ ແລະ ສົມຫວັງໃນທຸກປະການ!";
+
+            // Hide setup form
+            document.getElementById('setup-card').classList.add('hidden');
+            
+            // Show Wish Text Display
+            document.getElementById('wish-display').classList.remove('hidden');
+
+            // Play ambient tone if enabled
+            if (!isAudioPlaying) {
+                toggleAudio();
+            }
+
+            // Trigger Animation Sequence
+            setTimeout(() => {
+                // Avatars move slightly down (lowering krathong)
+                const avatars = document.getElementById('avatars-couple');
+                const krathong = document.getElementById('krathong-element');
+                
+                avatars.style.transform = 'translateY(15px) scale(0.95)';
+
+                // After lowering, Krathong detaches and floats down the river
+                setTimeout(() => {
+                    krathong.classList.add('krathong-departing');
+                    
+                    // Avatars rise back up and watch
+                    setTimeout(() => {
+                        avatars.style.transform = 'translateY(0px) scale(1)';
+                        
+                        // Show Reset button after krathong has floated away
+                        setTimeout(() => {
+                            document.getElementById('reset-container').classList.remove('hidden');
+                        }, 5000);
+                    }, 1200);
+
+                }, 1000);
+
+            }, 300);
+        }
+
+        // Reset application to float again
+        function resetApp() {
+            const krathong = document.getElementById('krathong-element');
+            
+            // Reset position without transition immediately
+            krathong.style.transition = 'none';
+            krathong.classList.remove('krathong-departing');
+            
+            // Re-enable transition
+            setTimeout(() => {
+                krathong.style.transition = '';
+            }, 50);
+
+            // Toggle UI components
+            document.getElementById('reset-container').classList.add('hidden');
+            document.getElementById('wish-display').classList.add('hidden');
+            document.getElementById('setup-card').classList.remove('hidden');
+        }
+
+        // Ambient Sound Synthesizer using Web Audio API
+        function toggleAudio() {
+            const icon = document.getElementById('audio-icon');
+            
+            if (!isAudioPlaying) {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    audioCtx = new AudioContext();
+
+                    // Create soft ambient pentatonic chord tone (Pentatonic pad)
+                    const frequencies = [261.63, 329.63, 392.00, 523.25]; // C E G C
+                    
+                    frequencies.forEach(freq => {
+                        const osc = audioCtx.createOscillator();
+                        const gain = audioCtx.createGain();
+                        
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                        
+                        // Soft volume ambient pad
+                        gain.gain.setValueAtTime(0.015, audioCtx.currentTime);
+                        
+                        osc.connect(gain);
+                        gain.connect(audioCtx.destination);
+                        osc.start();
+                    });
+
+                    isAudioPlaying = true;
+                    icon.className = "fa-solid fa-volume-high text-yellow-400 animate-pulse";
+                } catch (e) {
+                    console.log("Audio play blocked or unsupported:", e);
+                }
+            } else {
+                if (audioCtx) {
+                    audioCtx.close();
+                }
+                isAudioPlaying = false;
+                icon.className = "fa-solid fa-volume-xmark text-yellow-400";
+            }
+        }
+    </script>
+</body>
+</html>
